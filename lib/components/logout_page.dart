@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stisla_app/page/welcome.dart';
 import 'package:stisla_app/services/authentication.dart';
 
 class LogoutPage extends StatefulWidget {
@@ -81,7 +82,12 @@ class _LogoutPageState extends State<LogoutPage> {
                     setState(() {
                       _isLoading = false;
                     });
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (BuildContext context) => const WelcomePage(),
+                      ),
+                    );
                   } else {
                     setState(() {
                       _isLoading = false;
