@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart';
 import 'package:stisla_app/animation/fade_animation.dart';
 import 'package:stisla_app/components/input_text.dart';
+import 'package:stisla_app/page/home.dart';
+import 'package:stisla_app/services/registerservices.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -12,9 +17,17 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
+  final nInput = TextEditingController(text: "Akhmadheta Hafid");
   final eInput = TextEditingController();
-  final pInput = TextEditingController();
-  final cpInput = TextEditingController();
+  final pInput = TextEditingController(text: "12345678");
+  final cpInput = TextEditingController(text: "12345678");
+  bool _isLoading = false;
+
+  Future<Response> _register() async {
+    var log = await RegisterServices.signup(
+        nInput.text, eInput.text, pInput.text, cpInput.text);
+    return log;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +84,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Column(
                   children: <Widget>[
                     FadeAnimation(
+                      1.0,
+                      InputText(label: "Name", controller: nInput),
+                    ),
+                    FadeAnimation(
                       1.2,
                       InputText(label: "Email", controller: eInput),
                     ),
@@ -109,18 +126,56 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: MaterialButton(
                     minWidth: double.infinity,
                     height: 60,
-                    onPressed: () {
-                      _formKey.currentState!.validate();
+                    onPressed: () async {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      if (_formKey.currentState!.validate()) {
+                        setState(() {
+                          _isLoading = true;
+                        });
+
+                        var res = await _register();
+                        print(res.statusCode);
+
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        if (res.statusCode == 422) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                json.decode(res.body)['message'],
+                                style: const TextStyle(color: Colors.black),
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              backgroundColor: Colors.white,
+                            ),
+                          );
+                        } else if (res.statusCode == 200) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (BuildContext context) => const Home(),
+                            ),
+                          );
+                        }
+                      }
                     },
                     color: Colors.greenAccent,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(50)),
-                    child: const Text(
-                      "Sign up",
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
-                    ),
+                    child: !_isLoading
+                        ? const Text(
+                            "Sign up",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600, fontSize: 18),
+                          )
+                        : const CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
                   ),
                 ),
               ),
