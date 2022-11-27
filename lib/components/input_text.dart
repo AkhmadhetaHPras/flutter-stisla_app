@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
-class InputText extends StatelessWidget {
+class InputText extends StatefulWidget {
   String label;
   bool obscureText;
   TextEditingController controller;
   String? confirmation;
-  String? initValue;
 
   InputText({
     super.key,
@@ -16,12 +15,19 @@ class InputText extends StatelessWidget {
   });
 
   @override
+  State<InputText> createState() => _InputTextState();
+}
+
+class _InputTextState extends State<InputText> {
+  String? initValue;
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          label,
+          widget.label,
           style: const TextStyle(
               fontSize: 15, fontWeight: FontWeight.w400, color: Colors.black87),
         ),
@@ -29,11 +35,11 @@ class InputText extends StatelessWidget {
           height: 5,
         ),
         TextFormField(
-          controller: controller,
-          obscureText: obscureText,
+          controller: widget.controller,
+          obscureText: widget.obscureText,
           validator: (value) {
             String? msg;
-            switch (label) {
+            switch (widget.label) {
               case "Email":
                 if (value == null || value.isEmpty) {
                   msg = 'This field is required';
@@ -53,8 +59,16 @@ class InputText extends StatelessWidget {
               case "Confirm Password":
                 if (value == null || value.isEmpty) {
                   msg = 'This field is required';
-                } else if (value != confirmation) {
+                } else if (value != widget.confirmation) {
                   msg = 'Not Match';
+                } else {
+                  msg = null;
+                }
+                break;
+
+              case "Name":
+                if (value == null || value.isEmpty) {
+                  msg = 'This field is required';
                 } else {
                   msg = null;
                 }
@@ -74,7 +88,7 @@ class InputText extends StatelessWidget {
           ),
         ),
         const SizedBox(
-          height: 30,
+          height: 20,
         ),
       ],
     );

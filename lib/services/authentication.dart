@@ -7,7 +7,7 @@ import 'package:stisla_app/models/auth.dart';
 class Authentication {
   static const String baseURL = "10.0.2.2:8000";
 
-  static Future<String> login(String email, String password) async {
+  static Future<Response> login(String email, String password) async {
     var url = Uri.http(baseURL, '/api/auth/login');
 
     var result = await post(url, headers: {
@@ -28,10 +28,12 @@ class Authentication {
       localStorage.setString('deviceName', user.deviceName);
       localStorage.setString('token', user.token);
       print(jsonObject['token']);
-      return 'authenticated';
+      // return 'authenticated';
     } else {
-      return 'anauthenticated';
+      // return 'anauthenticated';
+      print(jsonObject['message']);
     }
+    return result;
   }
 
   static Future<String> logout(String token) async {

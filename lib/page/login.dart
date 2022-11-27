@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stisla_app/animation/fade_animation.dart';
 import 'package:stisla_app/components/input_text.dart';
@@ -38,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<String> _login() async {
+  Future<Response> _login() async {
     var log = await Authentication.login(eInput.text, pInput.text);
     _checkIfLoggedIn();
     return log;
@@ -147,15 +150,19 @@ class _LoginPageState extends State<LoginPage> {
                                 setState(() {
                                   _isLoading = true;
                                 });
-                                if (await _login() == 'anauthenticated') {
+                                var res = await _login();
+                                print(res.statusCode);
+
+                                if (res.statusCode == 422) {
                                   setState(() {
                                     _isLoading = false;
                                   });
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: const Text(
-                                        'email atau password salah',
-                                        style: TextStyle(color: Colors.black),
+                                      content: Text(
+                                        json.decode(res.body)['message'],
+                                        style: const TextStyle(
+                                            color: Colors.black),
                                       ),
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
